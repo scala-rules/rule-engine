@@ -1,27 +1,29 @@
 package org.scalarules.finance.nl
 
+import org.scalarules.finance.core.AbstractTerm
+
 /** Mogelijke periodes om te gebruiken met `Per`. */
-sealed trait Termijn extends Periode
+sealed trait Termijn extends AbstractTerm
 
 // scalastyle:off magic.number
 
 /** Representeert een termijn van 1 maand. */
-class Maand private[finance] () extends Periode(1) with Termijn {
+class Maand private[nl]() extends Periode(1) with Termijn {
   override def toString = "maand"
 }
 
 /** Representeert een termijn van 3 maanden. */
-class Kwartaal private[finance] () extends Periode(3) with Termijn {
+class Kwartaal private[nl]() extends Periode(3) with Termijn {
   override def toString = "kwartaal"
 }
 
 /** Representeert een termijn van 6 maanden. */
-class Halfjaar private[finance] () extends Periode(6) with Termijn {
+class Halfjaar private[nl]() extends Periode(6) with Termijn {
   override def toString = "halfjaar"
 }
 
 /** Representeert een termijn van 12 maanden / 1 jaar. */
-class Jaar private[finance] () extends Periode(12) with Termijn {
+class Jaar private[nl]() extends Periode(12) with Termijn {
   override def toString = "jaar"
 }
 

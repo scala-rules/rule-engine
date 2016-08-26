@@ -1,6 +1,7 @@
 package org.scalarules.finance.nl
 
 import org.scalatest.{FlatSpec, Matchers}
+import org.scalarules.finance.nl._
 
 class PercentageTest extends FlatSpec with Matchers {
 
@@ -83,7 +84,7 @@ class PercentageImplicitsTest extends FlatSpec with Matchers {
   it should "do commutative multiplication with Bedrag" in {
     val a = Bedrag(20)
     val p = Percentage(50)
-    a * p should be (p * a)
+    (a * p) should be (p * a)
   }
 
   it should "do commutative multiplication with Per" in {

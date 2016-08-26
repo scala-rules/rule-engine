@@ -3,52 +3,50 @@ package org.scalarules.finance.nl
 import java.text.NumberFormat
 import java.util.Locale
 
+import org.scalarules.finance.core.{AbstractAmount, Quantity}
+
 import scala.math.BigDecimal.RoundingMode._
+import scala.language.implicitConversions
 
 // scalastyle:off method.name
 
 /**
  * Representeert een bedrag in euro's.
  */
-case class Bedrag private[finance] (waarde: BigDecimal) {
-  /** Returnt de som van dit bedrag en n. */
-  def + (n: Bedrag): Bedrag = Bedrag(waarde + n.waarde)
+case class Bedrag private[finance] (waarde: BigDecimal) extends AbstractAmount[Bedrag](waarde) {
 
-  /** Returnt het verschil tussen dit bedrag en n. */
-  def - (n: Bedrag): Bedrag = Bedrag(waarde - n.waarde)
-
-  /** Returnt het product van dit bedrag en n. */
-  def * (n: BigDecimal): Bedrag = Bedrag(waarde * n)
-
-  /** Returnt het quotiënt van dit bedrag en n. */
-  def / (n: BigDecimal): Bedrag = Bedrag(waarde / n)
-
-  /** Returnt het quotiënt van dit bedrag en n. */
-  def / (n: Bedrag): BigDecimal = waarde / n.waarde
+  override protected def newAmount(newValue: BigDecimal): Bedrag = Bedrag(newValue)
 
   /** Kapt dit bedrag af (naar beneden) op een rond honderdtal euro's. */
-  def afgekaptOp100Euro: Bedrag = afgekaptOp(-2) // scalastyle:ignore magic.number
+  def afgekaptOp100Euro: Bedrag = internalTruncateTo100Euros
 
   /** Kapt dit bedrag af (naar beneden) op ronde euro's. */
-  def afgekaptOpEuros: Bedrag = afgekaptOp(0)
+  def afgekaptOpEuros: Bedrag = internalTruncateToEuros
 
   /** Kapt dit bedrag af (naar beneden) op hele centen. */
-  def afgekaptOpCenten: Bedrag = afgekaptOp(2)
+  def afgekaptOpCenten: Bedrag = internalTruncateToCents
 
   /** Rondt dit bedrag af op hele centen, volgens BigDecimal.RoundingMode.HALF_EVEN. */
-  def afgerondOpCenten: Bedrag = afgerondOp(2, BigDecimal.RoundingMode.HALF_EVEN)
+  def afgerondOpCenten: Bedrag = internalRoundToCents
 
-  def afgerondOp(aantalDecimalen: Integer, afrondingsWijze: RoundingMode): Bedrag =
-    Bedrag(waarde.setScale(aantalDecimalen, afrondingsWijze))
-
-  /** Kapt dit bedrag af (naar beneden) op het gegeven aantal decimalen. */
-  private def afgekaptOp(decimalen: Int): Bedrag = afgerondOp(decimalen, BigDecimal.RoundingMode.FLOOR)
+  def afgerondOp(aantalDecimalen: Integer, afrondingsWijze: RoundingMode): Bedrag = internalRoundTo(aantalDecimalen, afrondingsWijze)
 
   override def toString = NumberFormat.getCurrencyInstance(Bedrag.nederland).format(waarde)
 }
 
 object Bedrag {
   private val nederland = new Locale("nl", "NL")
+
+  implicit object QuantityBedrag extends Quantity[Bedrag] {
+    override def plus(n: Bedrag, m: Bedrag) = n + m
+    override def minus(n: Bedrag, m: Bedrag) = n - m
+    override def multiply(n: Bedrag, m: BigDecimal) = n * m
+    override def divide(n: Bedrag, m: BigDecimal) = n / m
+    override def divideAsFraction(n: Bedrag, m: Bedrag) = n / m
+    override def negate(n: Bedrag) = n * -1
+    override def zero = 0.euro
+    override def one = 1.euro
+  }
 }
 
 trait BedragImplicits {
@@ -61,6 +59,8 @@ trait BedragImplicits {
   }
   implicit class BigDecimalToBedrag(value: BigDecimal) extends ToBedrag(value)
   implicit class IntToBedrag(value: Int) extends ToBedrag(value)
+
+  private[finance] implicit def convertIntToBedrag(value: Int): Bedrag = Bedrag(BigDecimal(value))
 
   /** Het is niet mogelijk om een String te vermenigvuldigen met een Bedrag
     * Dit conflicteert met String's eigen * functie en is dus niet geimplementeerd*/
@@ -84,4 +84,16 @@ trait BedragImplicits {
     override def toDouble(x: Bedrag): Double = throw new UnsupportedOperationException("toDouble zou leiden tot een verlies van precisie.")
     override def compare(x: Bedrag, y: Bedrag): Int = x.waarde compare y.waarde
   }
+
+//  implicit object QuantityBedrag extends Quantity[Bedrag] {
+//    override def plus(n: Bedrag, m: Bedrag) = n + m
+//    override def minus(n: Bedrag, m: Bedrag) = n - m
+//    override def multiply(n: Bedrag, m: BigDecimal) = n * m
+//    override def divide(n: Bedrag, m: BigDecimal) = n / m
+//    override def divideAsFraction(n: Bedrag, m: Bedrag) = n / m
+//    override def negate(n: Bedrag) = n * -1
+//    override def zero = 0.euro
+//    override def one = 1.euro
+//  }
+
 }

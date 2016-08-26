@@ -1,30 +1,24 @@
 package org.scalarules.finance.nl
 
-import org.scalarules.finance.core.Quantity
+import org.scalarules.finance.core.{AbstractPer, AbstractTerm, Quantity}
 
 // scalastyle:off method.name
 
 /**
  * Geeft aan dat een bepaalde waarde van type W voorkomt voor elke termijn van type T.
  */
-case class Per[W, T <: Termijn](waarde: W, termijn: T) {
-  /** Returnt de som van deze W en n; per T. */
-  def + (n: W Per T)(implicit ev: Quantity[W]): W Per T = applySafely(ev.plus, this, n)
+case class Per[W, T <: Termijn](waarde: W, termijn: T) extends AbstractPer[W, T, Termijn, Periode](waarde, termijn) {
 
-  /** Returnt het verschil tussen deze W en n; per T. */
-  def - (n: W Per T)(implicit ev: Quantity[W]): W Per T = applySafely(ev.minus, this, n)
+  override type ActualPerConstructor[A, B <: Termijn] = Per[A, B]
 
-  /** Returnt het product van deze W en n; per T. */
-  def * (n: BigDecimal)(implicit ev: Quantity[W]): W Per T = Per(ev.multiply(waarde, n), termijn)
-
-  /** Returnt het quotiënt van deze W en n; per T. */
-  def / (n: BigDecimal)(implicit ev: Quantity[W]): W Per T = Per(ev.divide(waarde, n), termijn)
+  override protected def newPer[NT <: Termijn](newValue: W, newTerm: NT): W Per NT = Per(newValue, newTerm)
+  override protected def typedSelf: Per[W, T] = this
 
   /** Converteert dit naar de equivalente waarde per maand. */
-  def maandelijks(implicit ev: Quantity[W]): W Per Maand = Per(ev.divide(waarde, termijn.inMaanden), Maand)
+  def maandelijks(implicit ev: Quantity[W]): W Per Maand = internalMonthly(Maand)
 
   /** Converteert dit naar de equivalente waarde per jaar. */
-  def jaarlijks(implicit ev: Quantity[W]): W Per Jaar = Per(ev.multiply(waarde, termijn.frequentiePerJaar), Jaar)
+  def jaarlijks(implicit ev: Quantity[W]): W Per Jaar = internalYearly(Jaar)
 
   /** Past f toe op waarde en returnt het resultaat, per termijn. */
   def map[V](f: W => V): V Per T = Per(f(waarde), termijn)
@@ -34,10 +28,6 @@ case class Per[W, T <: Termijn](waarde: W, termijn: T) {
 
   override def toString = s"$waarde per $termijn"
 
-  private def applySafely(f: (W, W) => W, x: W Per T, y: W Per T): W Per T = {
-    require(x.termijn == y.termijn)
-    Per(f(x.waarde, y.waarde), x.termijn)
-  }
 }
 
 trait PerImplicits {

@@ -1,5 +1,6 @@
 package org.scalarules.finance.core
 
+import org.scalarules.finance.en.{Amount, AmountImplicits}
 import org.scalarules.finance.nl._
 
 import scala.annotation.implicitNotFound
@@ -35,7 +36,7 @@ trait Quantity[T] {
   def one: T
 }
 
-object Quantity {
+object Quantity extends AmountImplicits {
   implicit object QuantityBigDecimal extends Quantity[BigDecimal] {
     override def plus(n: BigDecimal, m: BigDecimal) = n + m
     override def minus(n: BigDecimal, m: BigDecimal) = n - m
@@ -45,16 +46,6 @@ object Quantity {
     override def negate(n: BigDecimal) = -n
     override def zero = 0
     override def one = 1
-  }
-  implicit object QuantityBedrag extends Quantity[Bedrag] {
-    override def plus(n: Bedrag, m: Bedrag) = n + m
-    override def minus(n: Bedrag, m: Bedrag) = n - m
-    override def multiply(n: Bedrag, m: BigDecimal) = n * m
-    override def divide(n: Bedrag, m: BigDecimal) = n / m
-    override def divideAsFraction(n: Bedrag, m: Bedrag) = n / m
-    override def negate(n: Bedrag) = n * -1
-    override def zero = 0.euro
-    override def one = 1.euro
   }
   private def quantityPerPeriode[W : Quantity, T <: Termijn](termijn: T): Quantity[W Per T] = new Quantity[W Per T] {
     override def plus(n: W Per T, m: W Per T): W Per T = n + m

@@ -1,6 +1,6 @@
 package org.scalarules.finance.nl
 
-import org.scalarules.finance.core.Quantity
+import org.scalarules.finance.core.{AbstractPercentage, Quantity}
 
 import scala.math.BigDecimal.RoundingMode.RoundingMode
 
@@ -9,31 +9,12 @@ import scala.math.BigDecimal.RoundingMode.RoundingMode
 /**
  * Representeert een percentage.
  */
-case class Percentage private[finance] (percentage: BigDecimal) extends Ordered[Percentage] {
+case class Percentage private[finance] (override val percentage: BigDecimal) extends AbstractPercentage[Percentage](percentage) with Ordered[Percentage] {
+
+  override protected def newPercentage(newPercentage: BigDecimal): Percentage = Percentage(newPercentage)
 
   /** Het percentage als een fractie tussen 0 en 1. */
-  val alsFractie: BigDecimal = percentage / 100
-
-  /** Returnt de som van dit percentage en p, als Percentage. */
-  def + (p: Percentage): Percentage = Percentage(percentage + p.percentage)
-
-  /** Returnt het verschil tussen dit percentage en p, als Percentage. */
-  def - (p: Percentage): Percentage = Percentage(percentage - p.percentage)
-
-  /** Returnt het percentage van p, als BigDecimal factor. */
-  def * (p: Percentage): BigDecimal = alsFractie * p.alsFractie
-
-  /** Returnt het percentage van n, als type T. */
-  def *[T : Quantity](n: T): T = implicitly[Quantity[T]].multiply(n, alsFractie)
-
-  /** Returnt het percentage van n, als BigDecimal factor zodat het geen precisie verliest. */
-  def * (n: Int): BigDecimal = alsFractie * n
-
-  /** Returnt het quotiënt van het percentage en p, als BigDecimal factor. */
-  def / (p: Percentage): BigDecimal = alsFractie / p.alsFractie
-
-  /** Returnt het quotiënt van het percentage en n, als BigDecimal factor. */
-  def / (n: BigDecimal): BigDecimal = alsFractie / n
+  val alsFractie: BigDecimal = internalAsFraction
 
   def afgerondOp (aantalDecimalen: Integer, afrondingsWijze: RoundingMode): Percentage =
     percentage.setScale(aantalDecimalen, afrondingsWijze).procent
