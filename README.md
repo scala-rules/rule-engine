@@ -5,6 +5,12 @@ The project started with a Dutch DSL to facilitate bankers writing mortgage-rela
 
 [![Codeship Status for scala-rules/scala-rules](https://codeship.com/projects/628dece0-e3e8-0133-a9e8-3aa3f222b1f1/status?branch=master)](https://codeship.com/projects/146192)
 
+# Current Status
+
+The current version of Scala-Rules depends on a compiler-plugin for Scala 2.11 that is no longer available. The unfortunate consequence of this is that the project will no longer compile and any project using scala-rules will also no longer compile, unless you have a cached binary of the plugin. The file required is the `org.scalameta:paradise:3.0.0.95_2.11`.
+
+Currently there are no plans to port or redevelop this library to Scala 3, since investigation is first required into the macro-capabilities of Scala 3.
+
 # Getting Started
 
 The minimal requirement to get started is to add the artifact containing the rule engine to your project. Below are snippets for SBT and Maven. Be sure to check if any newer versions are available and adjust the snippets accordingly.
