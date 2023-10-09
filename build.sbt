@@ -10,7 +10,8 @@ lazy val commonSettings = Seq(
   organizationHomepage := Some(url("https://github.com/scala-rules")),
   homepage := Some(url("https://github.com/scala-rules/rule-engine")),
   version := "0.5.2-SNAPSHOT",
-  scalaVersion := "2.11.8",
+  scalaVersion := "2.11.11",
+  crossScalaVersions := Seq("2.11.11", "2.12.3"),
   scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-Xlint", "-Xfatal-warnings")
 ) ++ staticAnalysisSettings ++ publishSettings
 
@@ -40,7 +41,7 @@ lazy val engine = (project in file("engine"))
     description := "Rule Engine",
     libraryDependencies ++= engineDependencies,
     addCompilerPlugin(
-      "org.scalameta" % "paradise" % "3.0.0.95" cross CrossVersion.full ),
+      "org.scalameta" % "paradise" % "3.0.0-M9" cross CrossVersion.full ),
     scalacOptions += "-Xplugin-require:macroparadise",
     resolvers += Resolver.url(
       "scalameta-bintray",
@@ -108,8 +109,8 @@ coverageExcludedPackages := ".*Macros"
 // Temporarily disabling scalastyle and coverage because they choke on scala meta macros
 // TODO : Extract the macros to their own subproject and disable these things there
 //addCommandAlias("verify", ";compileScalastyle;testScalastyle;coverage;test;coverageReport;coverageAggregate")
-addCommandAlias("verify", ";testScalastyle;test")
-addCommandAlias("release", ";clean;compile;publishSigned")
+addCommandAlias("verify", ";testScalastyle;+test")
+addCommandAlias("release", ";clean;+compile;+publishSigned")
 
 
 // *** Publishing ***
